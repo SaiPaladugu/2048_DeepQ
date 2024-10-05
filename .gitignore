@@ -51,3 +51,8 @@ docs/_build/
 
 # PyCharm
 .idea
+
+.venv/
+venv/
+.env/
+env/
