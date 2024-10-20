@@ -1,11 +1,2 @@
-cloudpickle==3.0.0
-Farama-Notifications==0.0.4
-gym==0.26.0
--e git+https://github.com/Asianadian/gym-examples.git@c9f6157fd6f6220e7deb45f22518a9a58b541192#egg=gym_examples
-gym-notices==0.0.8
-gymnasium==0.29.1
-importlib-metadata==8.5.0
-numpy==1.24.4
-pygame==2.1.0
-typing-extensions==4.12.2
-zipp==3.20.2
+gymnasium
+numpy
