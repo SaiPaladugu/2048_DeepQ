@@ -2,6 +2,52 @@ import gymnasium as gym
 from gymnasium import spaces
 import numpy as np
 
+def rot45_from_square(square_matrix, direction):
+    n, n = square_matrix.shape
+    diagonal_lengths = list(range(1, n + 1)) + list(range(n - 1, 0, -1))
+    rotated_diagonals = [np.ones(length) for length in diagonal_lengths]
+    
+        # Fill in the diagonals based on the rotation direction
+    for i in range(n):
+        for j in range(n):
+            row = i + j
+            if direction == 1:  # Clockwise
+                element_index = j if row < n else n - 1 - i
+            else:  # Counterclockwise
+                element_index = i if row < n else n - 1 - j
+               
+            rotated_diagonals[row][element_index] = square_matrix[i, j]
+        
+    return rotated_diagonals
+
+def rot45_to_square(rotated_diagonals, direction=1):
+    n = (len(rotated_diagonals) + 1) // 2
+    square_matrix = np.zeros((n, n))
+
+    # Reassemble the square matrix from the rotated diagonals
+    for row in range(len(rotated_diagonals)):
+        for element_index, value in enumerate(rotated_diagonals[row]):
+            if row < n:
+                if direction == 1:  # Clockwise
+                    i, j = element_index, row - element_index
+                else:  # Counterclockwise
+                    i, j = row - element_index, element_index
+            else:
+                if direction == 1:  # Clockwise
+                    i, j = element_index - len(rotated_diagonals[row]), n - 1 - element_index
+                else:  # Counterclockwise
+                    i, j = n - 1 - element_index, element_index - len(rotated_diagonals[row])
+            square_matrix[i, j] = value
+
+    return square_matrix
+
+def rot45(square_matrix_or_rotated_diagonals, direction):
+        # Initialize the result as a list of numpy arrays with the specified lengths
+        if isinstance(square_matrix_or_rotated_diagonals, np.ndarray):
+            return rot45_from_square(square_matrix_or_rotated_diagonals, direction)
+        else:
+            return rot45_to_square(square_matrix_or_rotated_diagonals, direction)
+
 class Game2048Env(gym.Env):
     metadata = {'render.modes': ['human']}
 
@@ -84,7 +130,13 @@ class Game2048Env(gym.Env):
                     return True
         return False
 
-    def move(self):
+    def move(self, diagonal=False):
+        if not diagonal:
+            return self.move_square()
+        else:
+            return self.move_rotated()
+    
+    def move_square(self):
         moved = False
         score = 0
         
@@ -110,3 +162,68 @@ class Game2048Env(gym.Env):
                 moved = True
             self.board[row] = merged_tiles
         return moved, score
+
+    def move_rotated(self):
+        moved = False
+        score = 0
+        
+        for row in range(len(self.board)):
+            tiles = self.board[row][self.board[row] != 0]
+            merged_tiles = []
+            skip = False
+            i = 0
+            while i < len(tiles):
+                if skip:
+                    skip = False
+                    i += 1
+                    continue
+                if i + 1 < len(tiles) and tiles[i] == tiles[i + 1]:
+                    merged_tiles.append(tiles[i] * 2)
+                    score += tiles[i] * 2
+                    skip = True
+                else:
+                    merged_tiles.append(tiles[i])
+                i += 1
+            merged_tiles += [0] * (self.board[row].shape[0] - len(merged_tiles))
+            if not np.array_equal(self.board[row], merged_tiles):
+                moved = True
+            self.board[row] = merged_tiles
+        return moved, score
+    
+if __name__ == "__main__":
+    # matrix = np.ones((5, 5))
+
+    # for i in range(matrix.shape[0]):
+    #     for j in range(matrix.shape[1]):
+    #         matrix[i, j] = (i)*(matrix.shape[1]) + (j+1)
+
+    # print(matrix)
+
+    # rotated_matrix = rot45(matrix, 1)
+    # print(rotated_matrix)
+    
+    # matrix = rot45(rotated_matrix, -1)
+    # print(matrix)
+
+    env = Game2048Env()
+    observation, info = env.reset()
+    done = False
+    total_score = 0
+    env.board = np.ones((4, 4))
+    env.render()
+    print("Initial state")
+
+    
+    env.board = rot45(env.board, 1)
+    #print(env.board)
+    env.move(diagonal=True)
+    env.board = rot45(env.board, -1)
+    env.render()
+
+    env.board = rot45(env.board, 1)
+    #print(env.board)
+    env.move(diagonal=True)
+    env.board = rot45(env.board, -1)
+    env.render()
+
+    print(f"Action taken: 'Left Down'")
