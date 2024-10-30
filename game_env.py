@@ -3,20 +3,16 @@ from gymnasium import spaces
 import numpy as np
 
 def rot45_from_square(square_matrix, direction):
+    #direction -> 1 = ccw, -1 = cw
     n, n = square_matrix.shape
     diagonal_lengths = list(range(1, n + 1)) + list(range(n - 1, 0, -1))
     rotated_diagonals = [np.ones(length, dtype=np.int64) for length in diagonal_lengths]
-    if direction == 1: square_matrix = np.fliplr(square_matrix)
+    if direction == 1: square_matrix = np.rot90(square_matrix, 1)
     
-    # Fill in the diagonals based on the rotation direction
     for i in range(n):
         for j in range(n):
             row = i + j
-            if direction == -1:  # Clockwise
-                element_index = j if row < n else n - 1 - i
-            elif direction == 1:  # Counterclockwise
-                element_index = i if row < n else n - 1 - j
-               
+            element_index = j if row < n else n - 1 - i
             rotated_diagonals[row][element_index] = square_matrix[i, j]
         
     return rotated_diagonals
