@@ -10,8 +10,6 @@ total_score = 0
 i = 0
 while not done:
     i += 1
-    if i == 10:
-        exit()
     action = env.action_space.sample()  # select a random action
     observation, reward, done, truncated, info = env.step(action)
     total_score += reward

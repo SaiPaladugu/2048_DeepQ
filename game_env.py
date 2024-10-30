@@ -5,7 +5,7 @@ import numpy as np
 def rot45_from_square(square_matrix, direction):
     n, n = square_matrix.shape
     diagonal_lengths = list(range(1, n + 1)) + list(range(n - 1, 0, -1))
-    rotated_diagonals = [np.ones(length, dtype=np.int8) for length in diagonal_lengths]
+    rotated_diagonals = [np.ones(length, dtype=np.int64) for length in diagonal_lengths]
     if direction == 1: square_matrix = np.fliplr(square_matrix)
     
     # Fill in the diagonals based on the rotation direction
@@ -23,7 +23,7 @@ def rot45_from_square(square_matrix, direction):
 
 def rot45_to_square(rotated_diagonals, direction):
     n = (len(rotated_diagonals) + 1) // 2
-    square_matrix = np.zeros((n, n), dtype=np.int8)
+    square_matrix = np.zeros((n, n), dtype=np.int64)
 
     # Reassemble the square matrix from the rotated diagonals
     for row in range(len(rotated_diagonals)):
@@ -216,6 +216,17 @@ class Game2048Env(gym.Env):
             for row in range(self.size - 1):
                 if self.board[row][col] == self.board[row + 1][col]:
                     return True
+        tl_br_diag_matrix = rot45(self.board, 1)
+        for row in tl_br_diag_matrix:
+            for col in range(len(row) - 1):
+                if row[col] == row[col+1]:
+                    return True
+        tr_bl_diag_matrix = rot45(self.board, -1)
+        for row in tr_bl_diag_matrix:
+            for col in range(len(row) - 1):
+                if row[col] == row[col+1]:
+                    return True
+
         return False
 
     def move(self, diagonal=False):
