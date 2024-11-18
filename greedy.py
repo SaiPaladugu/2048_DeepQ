@@ -1,4 +1,3 @@
-import numpy as np
 from game_env import Game2048Env
 import time
 import copy
