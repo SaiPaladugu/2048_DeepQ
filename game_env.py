@@ -5,7 +5,7 @@ import numpy as np
 class Game2048Env(gym.Env):
     metadata = {'render.modes': ['human']}
 
-    def __init__(self, size=4, goal=2048):
+    def __init__(self, size=4, goal=2**17):
         '''
         Initialize the 2048 game environment.
 
