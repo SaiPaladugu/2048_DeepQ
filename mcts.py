@@ -64,12 +64,15 @@ def best_x_games(x):
     for _ in range(x):
         print(f"Game {_} started")
         observation, info = env.reset()
+        env.render()
         done = False
         total_score = 0
 
         while not done:
             action = mcts_best_move(env, 2, 4)
+            print("Action:", action)
             observation, score, done, truncated, info = env.step(action)
+            env.render()
             total_score += score
             if done:
                 final_grid = observation.copy()  # Copy the final grid
