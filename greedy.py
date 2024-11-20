@@ -2,35 +2,38 @@ from game_env import Game2048Env
 import time
 import copy
 
-def getGreedyAction(env):
-    # Try all possible actions and see which one yields the highest score
-    best_score = 0
-    best_action = env.action_space.sample()
-    for action in range(env.action_space.n):
-        new_env = copy.deepcopy(env)
-        # Perform the action and get the resulting board and score
-        _, score, _, _, _ = new_env.step(action)
-        # Keep track of the best action based on the score
-        if score > best_score:
-            best_score = score
-            best_action = action
-    return best_action    
-        
 def greedyAlgo(x):
+    '''
+    Run a greedy algorithm for the 2048 game, selecting actions based on the highest simulated score.
+
+    Parameters:
+    - x (int): Number of episodes to run.
+
+    Prints the top 3 scores and their final grids after all episodes are completed.
+    '''
     env = Game2048Env()
     results = []
-    
+    episode_count = 0
+
     for _ in range(x):
+        episode_count += 1
+        print(f"Completing Episode {episode_count}/{x} episodes")
         observation, info = env.reset()
         done = False
         total_score = 0
 
-        # env.render()
         while not done:
-            action = getGreedyAction(env)
-            # print("chosen action: ", action)
+            # Simulate all possible actions
+            action_scores = env.simulateActions(env.board)
+            # Filter out actions that do not result in any move
+            valid_actions = {action: score for action, score in action_scores.items() if score > 0}
+            if valid_actions:
+                # Select the action with the maximum expected score
+                action = max(valid_actions, key=valid_actions.get)
+            else:
+                # If no valid actions with positive score, pick any possible move
+                action = env.action_space.sample()
             observation, score, done, truncated, info = env.step(action)
-            # env.render()
             total_score += score
             if done:
                 final_grid = observation.copy()  # Copy the final grid
@@ -43,13 +46,13 @@ def greedyAlgo(x):
     # Get the top 3 scores and their grids
     top_results = results[:3]
 
-    print(f"Top 3 scores after {len(results)} games:")
+    print(f"\nTop 3 scores after {len(results)} games:")
     for i, (score, grid) in enumerate(top_results, start=1):
         print(f"\nRank {i}: Score = {score}")
         print("Final Grid:")
         print(grid)
 
 start = time.time()
-greedyAlgo(100)
+greedyAlgo(10000)
 end = time.time()
 print("Time elapsed: ", end-start)

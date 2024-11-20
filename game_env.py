@@ -1,5 +1,5 @@
-import gymnasium as gym
-from gymnasium import spaces
+import gym as gym
+from gym import spaces
 import numpy as np
 
 class Game2048Env(gym.Env):
@@ -144,7 +144,7 @@ class Game2048Env(gym.Env):
         empty_cells = list(zip(*np.where(self.board == 0)))
         if empty_cells:
             row, col = empty_cells[np.random.randint(0, len(empty_cells))]
-            self.board[row][col] = 2 if np.random.random() < 0.9 else 4
+            self.board[row][col] = 2 #if np.random.random() < 0.9 else 4
 
     def can_move(self):
         '''
@@ -346,3 +346,67 @@ class Game2048Env(gym.Env):
         else:
             # Rotate the matrix back by 90 degrees clockwise if direction is 1
             return np.rot90(square_matrix, 1)
+    
+    def simulateActions(self, board):
+        '''
+        Simulate the possible score of each action without changing the current game.
+
+        Parameters:
+        - board (ndarray): The current board state.
+
+        Returns:
+        - actions (dict): A dictionary mapping each action to the expected score.
+        '''
+        actions = {}
+        original_board = self.board.copy()  # Store the original board
+        for action in range(8):
+            self.board = board.copy()  # Set the board to the provided state
+            moved = False
+            score = 0
+            if action == 0:
+                # Up
+                self.board = np.rot90(self.board, 1)
+                moved, score = self.move()
+                self.board = np.rot90(self.board, -1)
+            elif action == 1:
+                # Down
+                self.board = np.rot90(self.board, -1)
+                moved, score = self.move()
+                self.board = np.rot90(self.board, 1)
+            elif action == 2:
+                # Left
+                moved, score = self.move()
+            elif action == 3:
+                # Right
+                self.board = np.fliplr(self.board)
+                moved, score = self.move()
+                self.board = np.fliplr(self.board)
+            elif action == 4:
+                # Up Left (Diagonal)
+                self.board = self.rot45(self.board, 1)
+                moved, score = self.move(diagonal=True)
+                self.board = self.rot45(self.board, -1)
+            elif action == 5:
+                # Up Right (Diagonal)
+                self.board = np.fliplr(self.board)
+                self.board = self.rot45(self.board, 1)
+                moved, score = self.move(diagonal=True)
+                self.board = self.rot45(self.board, -1)
+                self.board = np.fliplr(self.board)
+            elif action == 6:
+                # Down Left (Diagonal)
+                self.board = self.rot45(self.board, -1)
+                moved, score = self.move(diagonal=True)
+                self.board = self.rot45(self.board, 1)
+            elif action == 7:
+                # Down Right (Diagonal)
+                self.board = np.fliplr(self.board)
+                self.board = self.rot45(self.board, -1)
+                moved, score = self.move(diagonal=True)
+                self.board = self.rot45(self.board, 1)
+                self.board = np.fliplr(self.board)
+            else:
+                raise ValueError("Invalid action")
+            actions[action] = score
+        self.board = original_board  # Restore the original board
+        return actions
