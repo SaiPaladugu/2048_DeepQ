@@ -1,6 +1,5 @@
 from game_env import Game2048Env
 import time
-import copy
 
 def greedyAlgo(x):
     '''
