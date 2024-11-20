@@ -22,6 +22,7 @@ class Game2048Env(gym.Env):
             shape=(self.size, self.size),
             dtype=np.int32
         )
+        self.merge_score = 0
         self.reset()
 
     def reset(self, seed=None, options=None):
@@ -126,7 +127,8 @@ class Game2048Env(gym.Env):
 
         done = not self.can_move()
         reward = score
-        info = {}
+        self.merge_score += score
+        info = {'moved': moved}
         return self.board.copy(), reward, done, False, info
 
     def render(self):
@@ -346,3 +348,9 @@ class Game2048Env(gym.Env):
         else:
             # Rotate the matrix back by 90 degrees clockwise if direction is 1
             return np.rot90(square_matrix, 1)
+
+    def max_tile(self):
+        return np.max(self.board)
+    
+    def tile_sum(self):
+        return np.sum(self.board)
