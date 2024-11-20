@@ -1,5 +1,5 @@
 import numpy as np
-from game_env import Game2048Env, rot45
+from game_env import Game2048Env
 
 def runActionTest(env, initial_board, action_sequence, expected_board):
   env.board = initial_board
@@ -13,7 +13,7 @@ def runRotateTest(env, initial_board, action_sequence, expected_board):
   env.board = initial_board
 
   for n in action_sequence:
-    env.board = rot45(env.board, 1 if int(n) else -1)
+    env.board = env.rot45(env.board, 1 if int(n) else -1)
 
   if isinstance(expected_board, list) and isinstance(expected_board, list):
     if len(expected_board) != len(env.board):

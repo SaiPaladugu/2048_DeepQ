@@ -22,8 +22,19 @@ class Game2048Env(gym.Env):
             shape=(self.size, self.size),
             dtype=np.int32
         )
-        self.merge_score = 0
         self.reset()
+
+    def __init__(self, board=[], size=4, goal=2048):
+        super(Game2048Env, self).__init__()
+        self.size = size
+        self.action_space = spaces.Discrete(8)  # 8 possible actions
+        self.observation_space = spaces.Box(
+            low=0,
+            high=goal,
+            shape=(self.size, self.size),
+            dtype=np.int32
+        )
+        self.board = board.copy() if isinstance(board, np.ndarray) else board
 
     def reset(self, seed=None, options=None):
         '''
@@ -127,7 +138,89 @@ class Game2048Env(gym.Env):
 
         done = not self.can_move()
         reward = score
-        self.merge_score += score
+        info = {'moved': moved}
+        return self.board.copy(), reward, done, False, info
+    
+    def test_step(self, action):
+        '''
+        Perform an action in the environment.
+
+        Parameters:
+        - action (int): The action to perform.
+
+        Actions:
+        0: Up
+        1: Down
+        2: Left
+        3: Right
+        4: Up Left (Diagonal)
+        5: Up Right (Diagonal)
+        6: Down Left (Diagonal)
+        7: Down Right (Diagonal)
+
+        Returns:
+        - observation (ndarray): The new board state.
+        - reward (int): The score obtained from this action.
+        - done (bool): Whether the game is over.
+        - info (dict): Additional information.
+        '''
+        moved = False
+        score = 0
+        if action == 0:
+            # Up
+            self.board = np.rot90(self.board, 1)
+            moved, score = self.move()
+            self.board = np.rot90(self.board, -1)
+
+        elif action == 1:
+            # Down
+            self.board = np.rot90(self.board, -1)
+            moved, score = self.move()
+            self.board = np.rot90(self.board, 1)
+
+        elif action == 2:
+            # Left
+            moved, score = self.move()
+
+        elif action == 3:
+            # Right
+            self.board = np.fliplr(self.board)
+            moved, score = self.move()
+            self.board = np.fliplr(self.board)
+
+        elif action == 4:
+            # Up Left (Diagonal)
+            self.board = self.rot45(self.board, 1)
+            moved, score = self.move(diagonal=True)
+            self.board = self.rot45(self.board, -1)
+
+        elif action == 5:
+            # Up Right (Diagonal)
+            self.board = np.fliplr(self.board)
+            self.board = self.rot45(self.board, 1)
+            moved, score = self.move(diagonal=True)
+            self.board = self.rot45(self.board, -1)
+            self.board = np.fliplr(self.board)
+
+        elif action == 6:
+            # Down Left (Diagonal)
+            self.board = self.rot45(self.board, -1)
+            moved, score = self.move(diagonal=True)
+            self.board = self.rot45(self.board, 1)
+
+        elif action == 7:
+            # Down Right (Diagonal)
+            self.board = np.fliplr(self.board)
+            self.board = self.rot45(self.board, -1)
+            moved, score = self.move(diagonal=True)
+            self.board = self.rot45(self.board, 1)
+            self.board = np.fliplr(self.board)
+
+        else:
+            raise ValueError("Invalid action")
+
+        done = not self.can_move()
+        reward = score
         info = {'moved': moved}
         return self.board.copy(), reward, done, False, info
 
