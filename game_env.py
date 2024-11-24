@@ -144,7 +144,7 @@ class Game2048Env(gym.Env):
         empty_cells = list(zip(*np.where(self.board == 0)))
         if empty_cells:
             row, col = empty_cells[np.random.randint(0, len(empty_cells))]
-            self.board[row][col] = 2 #if np.random.random() < 0.9 else 4
+            self.board[row][col] = 2 if np.random.random() < 0.9 else 4
 
     def can_move(self):
         '''
