@@ -48,7 +48,7 @@ def mcts_best_move(env:Game2048Env, depth=5, simulation_count=10):
   for action in range(env.action_space.n):
     #print("Simulating:", action)
 
-    simulation_env:Game2048Env = Game2048Env(env.board)
+    simulation_env:Game2048Env = deepcopy(env)
     _, reward, _, _, info = simulation_env.step(action)
 
     if not info['moved']:
@@ -68,9 +68,10 @@ def mcts_best_move(env:Game2048Env, depth=5, simulation_count=10):
       if threads[action][i]: threads[action][i].join()
 
   #print(value_sums)
-  
+
+  #print("values", value_sums)
   best_move = np.argmax(value_sums)
-  if value_sums.all() == 0: return random.sample(range(env.action_space.n), 1)[0]
+  if sum(value_sums) == 0: return random.sample(range(env.action_space.n), 1)[0]
   return best_move
 
 def random_game_thread(env, value_sums, action, depth=5, value_sums_lock=None, board_lock=None):
@@ -98,12 +99,14 @@ def mcts_game_thread(thread_number, total_score_list, max_tile_list, total_score
   total_score = 0
 
   while not done:
-    action = mcts_best_move(env, 1, 4)
+    action = mcts_best_move(env, 4, 8)
+    #print(action)
     observation, score, done, truncated, info = env.step(action)
-    print(f'Thread {thread_number} took action {action}')
+    #print(f'Thread {thread_number} took action {action}')
     total_score += score
 
     if done:
+      print(f"Thread {thread_number} done")
       with total_score_list_lock:
         total_score_list.append(total_score)
 
