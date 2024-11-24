@@ -56,3 +56,6 @@ docs/_build/
 venv/
 .env/
 env/
+
+# Plots
+*.png
