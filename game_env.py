@@ -347,7 +347,7 @@ class Game2048Env(gym.Env):
             # Rotate the matrix back by 90 degrees clockwise if direction is 1
             return np.rot90(square_matrix, 1)
     
-    def simulateActions(self, board):
+    def simulateActions(self):
         '''
         Simulate the possible score of each action without changing the current game.
 
@@ -360,7 +360,7 @@ class Game2048Env(gym.Env):
         actions = {}
         original_board = self.board.copy()  # Store the original board
         for action in range(8):
-            self.board = board.copy()  # Set the board to the provided state
+            self.board = original_board.copy()  # Set the board to the provided state
             moved = False
             score = 0
             if action == 0:

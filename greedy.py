@@ -5,7 +5,7 @@ import numpy as np
 
 def getGreedyAction(env):
     # Simulate all possible actions
-    action_scores = env.simulateActions(env.board)
+    action_scores = env.simulateActions()
     # Filter out actions that do not result in any move
     valid_actions = {action: score for action, score in action_scores.items() if score > 0}
     if valid_actions:
