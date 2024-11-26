@@ -4,6 +4,10 @@
 ![Python](https://img.shields.io/badge/Python-3.8%2B-blue)
 ![PyTorch](https://img.shields.io/badge/PyTorch-1.10.0-brightgreen)
 
+## Record Game
+<img width="269" alt="Screenshot 2024-11-26 at 12 55 30 PM" src="https://github.com/user-attachments/assets/ebd5b6f8-70c5-4384-a309-7aa17fb4f5fc">
+
+
 ## Table of Contents
 
 - [Overview](#overview)
