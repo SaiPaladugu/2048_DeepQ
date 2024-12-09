@@ -126,7 +126,7 @@ class Game2048Env(gym.Env):
 
         done = not self.can_move()
         reward = score
-        info = {}
+        info = {'moved': moved}
         return self.board.copy(), reward, done, False, info
 
     def render(self):
@@ -206,6 +206,7 @@ class Game2048Env(gym.Env):
         '''
         moved = False
         score = 0
+        new_board = self.board.copy()
         for row in range(self.size):
             # Extract non-zero tiles
             tiles = self.board[row][self.board[row] != 0]
@@ -229,7 +230,9 @@ class Game2048Env(gym.Env):
             merged_tiles += [0] * (self.size - len(merged_tiles))
             if not np.array_equal(self.board[row], merged_tiles):
                 moved = True
-            self.board[row] = merged_tiles
+            new_board[row] = merged_tiles
+        if moved:
+            self.board = new_board
         return moved, score
 
     def move_rotated(self):
@@ -244,6 +247,7 @@ class Game2048Env(gym.Env):
         '''
         moved = False
         score = 0
+        new_board = self.board.copy()  # Create a copy to store changes
         for row in range(len(self.board)):
             # Extract non-zero tiles
             tiles = self.board[row][self.board[row] != 0]
@@ -265,9 +269,14 @@ class Game2048Env(gym.Env):
                 i += 1
             # Pad the merged tiles with zeros to maintain row length
             merged_tiles += [0] * (self.board[row].shape[0] - len(merged_tiles))
+            # Check if any tile has changed in this row
             if not np.array_equal(self.board[row], merged_tiles):
                 moved = True
-            self.board[row] = merged_tiles
+            # Update the new_board with merged tiles
+            new_board[row] = merged_tiles
+        # Only update the actual board if a move has occurred
+        if moved:
+            self.board = new_board
         return moved, score
 
     def rot45(self, square_matrix_or_rotated_diagonals, direction):
@@ -346,3 +355,9 @@ class Game2048Env(gym.Env):
         else:
             # Rotate the matrix back by 90 degrees clockwise if direction is 1
             return np.rot90(square_matrix, 1)
+    
+    def get_state(self):
+        return self.board.copy()
+
+    def set_state(self, state):
+        self.board = state.copy()
